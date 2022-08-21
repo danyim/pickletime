@@ -4,34 +4,22 @@ const USERNAME = Cypress.env("SPOTERY_USERNAME");
 const PASSWORD = Cypress.env("SPOTERY_PASSWORD");
 const FIRST_NAME = Cypress.env("SPOTERY_USER_FIRST_NAME");
 
-enum AppState {
-  NotLoggedIn,
-  LoginPromptFirstTime,
-  LoginPromptSecondTime,
-}
-
-const login = (name: string) => {
-  cy.session(
-    name,
-    () => {
-      cy.visit("https://www.spotery.com/");
-      cy.get("a").contains("login / sign up").click();
-      cy.get("div.auth0-lock-name").should("exist");
-      cy.get("input[type='email']").type(USERNAME);
-      cy.get("input[type='password']").type(PASSWORD);
-      cy.get("span.auth0-label-submit").contains("Log In").click();
-
-      // Verify we're logged in
-      verifyLoggedIn();
-    },
-    {
-      validate() {},
-    }
-  );
+/** On the login page, enters and submits the user login details */
+const enterAndSubmitUserDetails = () => {
+  cy.get("input[type='email']").type(USERNAME);
+  cy.get("input[type='password']").type(PASSWORD);
+  cy.get("span.auth0-label-submit").contains("Log In").click();
 };
 
+/** Clicks the Login button on the home page */
+const clickLogin = () => {
+  cy.get("a").contains("login / sign up").click();
+  cy.get("div.auth0-lock-name").should("exist");
+};
+
+/** Assertions to verify that the user is logged in */
 const verifyLoggedIn = () => {
-  cy.contains("Daniel").should("exist");
+  cy.contains(FIRST_NAME).should("exist");
 };
 
 describe("Spotery Login", () => {
@@ -43,13 +31,10 @@ describe("Spotery Login", () => {
     });
   });
 
-  it("logs in (first time)", () => {
+  xit("[DEBUG] logs in (first time)", () => {
     cy.visit("https://www.spotery.com/");
-    cy.get("a").contains("login / sign up").click();
-    cy.get("div.auth0-lock-name").should("exist");
-    cy.get("input[type='email']").type(USERNAME);
-    cy.get("input[type='password']").type(PASSWORD);
-    cy.get("span.auth0-label-submit").contains("Log In").click();
+    clickLogin();
+    enterAndSubmitUserDetails();
     verifyLoggedIn();
   });
 
@@ -57,25 +42,25 @@ describe("Spotery Login", () => {
    * When logging in for the nth time, Auth0 recognizes your cookie/auth token and will simply
    * present you with a username to click on.
    */
-  it("logs in (nth time)", () => {
+  xit("[DEBUG] logs in (nth time)", () => {
     cy.visit("https://www.spotery.com/");
-    cy.get("a").contains("login / sign up").click();
-    cy.get("div.auth0-lock-name").should("exist");
+    clickLogin();
     cy.get(".auth0-lock-social-button-text").click();
 
     verifyLoggedIn();
   });
 
-  it.only("logs in using sessions API", () => {
+  /**
+   * This is the only test case that seems to work. Auth0 requires a cookie to be set upon
+   * redirection and Cypress' session wrapper is the only way to for Spotery to get the context
+   */
+  it.only("logs in using Cypress' sessions API", () => {
     cy.session(
       [USERNAME, PASSWORD],
       () => {
         cy.visit("https://www.spotery.com/");
-        cy.get("a").contains("login / sign up").click();
-        cy.get("div.auth0-lock-name").should("exist");
-        cy.get("input[type='email']").type(USERNAME);
-        cy.get("input[type='password']").type(PASSWORD);
-        cy.get("span.auth0-label-submit").contains("Log In").click();
+        clickLogin();
+        enterAndSubmitUserDetails();
 
         // Verify we're logged in
         verifyLoggedIn();
@@ -96,11 +81,6 @@ describe("Spotery Login", () => {
         validate() {},
       }
     );
-  });
-
-  xit("check if logged in", () => {
-    cy.visit("https://www.spotery.com/");
-    verifyLoggedIn();
   });
 
   // Needs work. We can use jQuery to determine the AppState and make conditional assertions/actions from there

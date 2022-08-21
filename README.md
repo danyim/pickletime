@@ -7,7 +7,8 @@ Leveraging Cypress to automate the booking of a tennis/pickleball court at Glen 
     ```json
     {
       "SPOTERY_USERNAME": "test@email.com",
-      "SPOTERY_PASSWORD": "password"
+      "SPOTERY_PASSWORD": "password",
+      "SPOTERY_USER_FIRST_NAME": "Jane"
     }
     ```
 - `yarn install` to fetch dependencies
