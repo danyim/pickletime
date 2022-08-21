@@ -1,5 +1,9 @@
 /// <reference types="cypress" />
 
+const USERNAME = Cypress.env("SPOTERY_USERNAME");
+const PASSWORD = Cypress.env("SPOTERY_PASSWORD");
+const FIRST_NAME = Cypress.env("SPOTERY_USER_FIRST_NAME");
+
 enum AppState {
   NotLoggedIn,
   LoginPromptFirstTime,
@@ -13,8 +17,8 @@ const login = (name: string) => {
       cy.visit("https://www.spotery.com/");
       cy.get("a").contains("login / sign up").click();
       cy.get("div.auth0-lock-name").should("exist");
-      cy.get("input[type='email']").type(Cypress.env("SPOTERY_USERNAME"));
-      cy.get("input[type='password']").type(Cypress.env("SPOTERY_PASSWORD"));
+      cy.get("input[type='email']").type(USERNAME);
+      cy.get("input[type='password']").type(PASSWORD);
       cy.get("span.auth0-label-submit").contains("Log In").click();
 
       // Verify we're logged in
@@ -30,13 +34,11 @@ const verifyLoggedIn = () => {
   cy.contains("Daniel").should("exist");
 };
 
-describe("spotery", () => {
+describe("Spotery Login", () => {
   beforeEach(() => {
-    console.log("ENV VARS", Cypress.env());
     // Turn off exception handling
-    Cypress.on("uncaught:exception", (err, runnable) => {
-      // returning false here prevents Cypress from
-      // failing the test
+    Cypress.on("uncaught:exception", () => {
+      // returning false here prevents Cypress from failing the test
       return false;
     });
   });
@@ -45,12 +47,16 @@ describe("spotery", () => {
     cy.visit("https://www.spotery.com/");
     cy.get("a").contains("login / sign up").click();
     cy.get("div.auth0-lock-name").should("exist");
-    cy.get("input[type='email']").type(Cypress.env("SPOTERY_USERNAME"));
-    cy.get("input[type='password']").type("SPOTERY_PASSWORD");
+    cy.get("input[type='email']").type(USERNAME);
+    cy.get("input[type='password']").type(PASSWORD);
     cy.get("span.auth0-label-submit").contains("Log In").click();
     verifyLoggedIn();
   });
 
+  /**
+   * When logging in for the nth time, Auth0 recognizes your cookie/auth token and will simply
+   * present you with a username to click on.
+   */
   it("logs in (nth time)", () => {
     cy.visit("https://www.spotery.com/");
     cy.get("a").contains("login / sign up").click();
@@ -61,25 +67,18 @@ describe("spotery", () => {
   });
 
   it.only("logs in using sessions API", () => {
-    const username = Cypress.env("SPOTERY_USERNAME");
-    const password = Cypress.env("SPOTERY_PASSWORD");
-
     cy.session(
-      [username, password],
+      [USERNAME, PASSWORD],
       () => {
         cy.visit("https://www.spotery.com/");
         cy.get("a").contains("login / sign up").click();
         cy.get("div.auth0-lock-name").should("exist");
-        cy.get("input[type='email']").type(username);
-        cy.get("input[type='password']").type(password);
+        cy.get("input[type='email']").type(USERNAME);
+        cy.get("input[type='password']").type(PASSWORD);
         cy.get("span.auth0-label-submit").contains("Log In").click();
 
         // Verify we're logged in
         verifyLoggedIn();
-
-        // // Homepage: select city
-        // cy.get("select").select("San Francisco");
-        // cy.get("a").contains("search").click();
 
         const dateStr = "08/21/2022";
         cy.visit(
@@ -99,12 +98,12 @@ describe("spotery", () => {
     );
   });
 
-  it("check if logged in", () => {
+  xit("check if logged in", () => {
     cy.visit("https://www.spotery.com/");
     verifyLoggedIn();
   });
 
-  // Needs work. We can use jQuery to determine the AppState and make assertions/actions from there
+  // Needs work. We can use jQuery to determine the AppState and make conditional assertions/actions from there
   xit("check if logged in", () => {
     cy.visit("https://www.spotery.com/");
     cy.get("body")

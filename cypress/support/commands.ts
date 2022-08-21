@@ -24,6 +24,10 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
+/**
+ * Unconfirmed if this function works for captchas.
+ * From https://stackoverflow.com/a/66137384/350951
+ */
 Cypress.Commands.add("confirmCaptcha", () => {
   cy.get("iframe")
     .first()
