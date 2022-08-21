@@ -10,6 +10,7 @@ Leveraging Cypress to automate the booking of a tennis/pickleball court at Glen 
       "SPOTERY_PASSWORD": "password"
     }
     ```
+- `yarn install` to fetch dependencies
 - Run `yarn cy:open`
 
 ## TODO
